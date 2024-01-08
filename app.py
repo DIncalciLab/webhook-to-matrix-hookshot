@@ -31,7 +31,10 @@ def slack(hook):
             title = str(field.get('title', ''))
             value = str(field.get('value', ''))
             if title and value:
-                plain.append(f"**{title}**: {value}\n")
+                if title == "Pipeline configuration":
+                    plain.append(f"#### {title}\n\n {value}\n")
+                else:
+                    plain.append(f"**{title}**: {value}\n")
 
         if footer:
             plain.append(footer)
