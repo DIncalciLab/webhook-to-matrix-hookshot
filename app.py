@@ -22,16 +22,16 @@ def slack(hook):
         fields = attachment.get('fields', [])
 
         if title and title_link:
-            formatted = f"### [{title}]({title_link})" if title_link else f"## {title}"
+            formatted = f"### [{title}]({title_link})\n" if title_link else f"## {title}\n"
             plain.append(formatted)
         if text:
-            plain.append(text)
+            plain.append(text + "\n")
 
         for field in fields:
             title = str(field.get('title', ''))
             value = str(field.get('value', ''))
             if title and value:
-                plain.append(f"**{title}**: {value}")
+                plain.append(f"**{title}**: {value}\n")
 
         if footer:
             plain.append(footer)
