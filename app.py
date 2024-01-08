@@ -6,10 +6,9 @@ app = Flask(__name__)
 
 @app.route("/webhook/slack/<hook>", methods=['POST'])
 def slack(hook):
-    plain = ''
-    html = ''
+    plain = []
     incoming = request.json
-    print('Got incoming /slack hook: ' + str(incoming))
+    app.logger.debug(f'Got incoming /slack hook: {incoming} ')
 
     attachments = incoming.get('attachments', [])
     username = str(incoming.get('username', ''))
@@ -22,42 +21,30 @@ def slack(hook):
         footer = str(attachment.get('footer', ''))
         fields = attachment.get('fields', [])
 
-        html += '<font color="' + color + '">' if color else ''
-
         if title and title_link:
-            plain += title + ' ' + title_link + '\n'
-            html += '<b><a href="' + title_link + '">' + title + '</a></b><br/>\n'
-        elif title:
-            plain += title + '\n'
-            html += '<b>' + title + '</b><br/>\n'
-
+            formatted = f"### [{title}]({title_link})" if title_link else f"## {title}"
+            plain.append(formatted)
         if text:
-            plain += text + '\n'
-            html += text + '<br/>\n'
+            plain.append(text)
 
         for field in fields:
             title = str(field.get('title', ''))
             value = str(field.get('value', ''))
             if title and value:
-                plain += title + ': ' + value + '\n'
-                html += '<b>' + title + '</b>: ' + value + '<br/>\n'
+                plain.append(f"**{title}**: {value}")
 
         if footer:
-            plain += footer + '\n'
-            html += footer + '<br/>\n'
+            plain.append(footer)
 
-        html += '</font>' if color else ''
+    assembled_message = plain.join("\n")
 
-    if plain and html:
-        if username:
-            json = {'text':plain,'html':html,'username':username}
-        else:
-            json = {'text':plain,'html':html}
-        print('Sending hookshot: ' + str(json))
-        r = requests.post(url + hook, json=json)
+    if username:
+        json = {"text": plain, "username": username}
     else:
-        print('Invalid format, sending unmodified.')
-        r = requests.post(url + hook, json=incoming)
+        json = {"text": plain}
+
+    app.logger.debug(f'Sending hookshot:{json}')
+    r = requests.post(url + hook, json=json)
 
     response = make_response('ok', 200)
     response.mimetype = "text/plain"
