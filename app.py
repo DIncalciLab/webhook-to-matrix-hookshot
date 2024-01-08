@@ -39,9 +39,9 @@ def slack(hook):
     assembled_message = "\n".join(plain)
 
     if username:
-        json = {"text": plain, "username": username}
+        json = {"text": assembled_message, "username": username}
     else:
-        json = {"text": plain}
+        json = {"text": assembled_message}
 
     app.logger.debug(f'Sending hookshot:{json}')
     r = requests.post(url + hook, json=json)
