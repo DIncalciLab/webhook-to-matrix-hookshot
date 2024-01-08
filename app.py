@@ -36,7 +36,7 @@ def slack(hook):
         if footer:
             plain.append(footer)
 
-    assembled_message = plain.join("\n")
+    assembled_message = "\n".join(plain)
 
     if username:
         json = {"text": plain, "username": username}
